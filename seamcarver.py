@@ -4,6 +4,20 @@ from picture import Picture
 from math import sqrt
 
 class SeamCarver(Picture):
+    def _clamp_to_width(self, i: int) -> int:
+        if i < 0:
+            return 0
+        elif i >= self.width():
+            return self.width() - 1
+        return i
+
+    def _clamp_to_height(self, j: int) -> int:
+        if j < 0:
+            return 0
+        elif j >= self.height():
+            return self.height() - 1
+        return j
+
     def energy(self, i: int, j: int) -> float:
         w = self.width()  - 1
         h = self.height() - 1
@@ -33,16 +47,53 @@ class SeamCarver(Picture):
         
         return e
 
-    ## TO-DO: fill in the methods below
     def find_vertical_seam(self) -> list[int]:
-        '''
-        Return a sequence of indices representing the lowest-energy
-        vertical seam
+        ## This dictionary contains all of the minimum energy seams as described by the recurrence
+        ## M[i,j] = e(i,j) + min(M[i-1, j-1], M[i, j-1], M[i+1, j-1])
+        M = dict()
 
-        Milestone 2 (pytest -m m2)
-        '''
-        raise NotImplementedError
+        ## sets up the table with infinities for 'unexplored' values
+        ## NOTE: maybe we're able to skip this somehow...
+        for i in range(self.width()):
+            for j in range(self.height()):
+                M[i, j] = float('inf')
 
+        last_row_min = float('inf')
+        min_col = 0
+
+        ## bottom-up DP
+        for j in range(self.height()):
+            for i in range(self.width()):
+                if j == 0:
+                    M[i, j] = self.energy(i, j)
+                else:
+                    M[i, j] = self.energy(i, j) + \
+                        min(  M[self._clamp_to_width(i-1), j-1],
+                              M[i,                         j-1],
+                              M[self._clamp_to_width(i+1), j-1]  )
+                if j == self.height() - 1 and M[i, j] < last_row_min:
+                    last_row_min = M[i, j]
+                    min_col = i
+
+        seam = [min_col]
+
+        ## working back up
+        for row in range(self.height() - 1, 0, -1):
+            prev_col = seam[-1]
+            ## NOTE: this can *probably* just be initialized as one of the three values
+            ## and only compare the remaining two. probably.
+            min_next_col = prev_col
+            for next_col in [prev_col - 1, prev_col, prev_col + 1]:
+                if M[self._clamp_to_width(next_col), row - 1] < M[min_next_col, row - 1]:
+                    min_next_col = self._clamp_to_width(next_col)
+            seam.append(min_next_col)
+        
+        seam.reverse()
+        return seam
+
+        
+
+    ## TO-DO: fill in the methods below
     def find_horizontal_seam(self) -> list[int]:
         '''
         Return a sequence of indices representing the lowest-energy
