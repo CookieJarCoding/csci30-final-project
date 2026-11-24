@@ -1,0 +1,9 @@
+/conftest.py
+/gui.py
+/picture.py
+/pytest.ini
+/requirements.txt
+/testkit.py
+/data/
+/tests/
+/__pycache__
