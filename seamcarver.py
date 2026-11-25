@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PIL import Image
 from picture import Picture
 from math import sqrt
 
@@ -101,7 +102,13 @@ class SeamCarver(Picture):
 
         Milestone 3 (pytest -m m3)
         '''
-        raise NotImplementedError
+
+        transposed_img = Image.new('RGB', (self.height(), self.width()))
+        transposed_img.putdata([self[j, i] for j in range(self.width()) for i in range(self.height())])
+
+        transposed_seam_carver = SeamCarver(transposed_img)
+
+        return transposed_seam_carver.find_vertical_seam()
 
     def remove_vertical_seam(self, seam: list[int]):
         '''
