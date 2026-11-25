@@ -96,13 +96,6 @@ class SeamCarver(Picture):
 
     ## TO-DO: fill in the methods below
     def find_horizontal_seam(self) -> list[int]:
-        '''
-        Return a sequence of indices representing the lowest-energy
-        horizontal seam
-
-        Milestone 3 (pytest -m m3)
-        '''
-
         transposed_img = Image.new('RGB', (self.height(), self.width()))
         transposed_img.putdata([self[j, i] for j in range(self.width()) for i in range(self.height())])
 
@@ -111,12 +104,29 @@ class SeamCarver(Picture):
         return transposed_seam_carver.find_vertical_seam()
 
     def remove_vertical_seam(self, seam: list[int]):
-        '''
-        Remove a vertical seam from the picture
+        w = self.width() - 1
 
-        Milestone 4 (pytest -m m4)
-        '''
-        raise NotImplementedError
+        # validity check
+        if self.width() == 1 or len(seam) != self.height():
+            raise SeamError
+        else:
+            for n in range(len(seam)):
+                if seam[n] < 0 or seam[n] > w:
+                    raise SeamError
+                if n != 0 and abs(seam[n]-seam[n-1]) > 1:
+                    raise SeamError
+
+        # shifting
+        for j in range(self.height()):
+            for i in range(seam[j], self.width()):
+                if i != w:
+                    self[i, j] = self[i+1, j]
+                else:
+                    del self[i, j]
+
+        ## NOTE: Confirm whether or not updating self._width directly like this is allowed
+        self._width -= 1
+        
 
     def remove_horizontal_seam(self, seam: list[int]):
         '''
