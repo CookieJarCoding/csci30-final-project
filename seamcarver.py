@@ -129,12 +129,26 @@ class SeamCarver(Picture):
         
 
     def remove_horizontal_seam(self, seam: list[int]):
-        '''
-        Remove a horizontal seam from the picture
+        # transposition 1
+        transposed_img = Image.new('RGB', (self.height(), self.width()))
+        transposed_img.putdata([self[j, i] for j in range(self.width()) for i in range(self.height())])
 
-        Milestone 5 (pytest -m m5)
-        '''
-        raise NotImplementedError
+        transposed_seam_carver = SeamCarver(transposed_img)
+
+        # seam removal
+        transposed_seam_carver.remove_vertical_seam(seam)
+
+        # transposition 2
+        for j in range(self.height()):
+            for i in range(self.width()):
+                if j != transposed_seam_carver.width():
+                    self[i,j] = transposed_seam_carver[j,i]
+                else:
+                    del self[i,j]
+
+        ## NOTE: Confirm whether or not updating self._height directly like this is allowed
+        self._height -= 1
+
 
 class SeamError(Exception):
     pass
